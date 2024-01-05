@@ -1,9 +1,12 @@
 import traceback
 import re
+import os
+import os.path
 
 # any length > 0 of the following: { X, numbers, hybrid e.g. (U/R), WUBRGC }
 mana_pattern = re.compile(
     '(X|' '\d|' '(\([WUBRGC2]/[WUBRGC]\))|' '[WUBRGC])+')
+
 
 def get_card_from_user_input(player, string):
     """Convert a user input (naming a card in a zone) to an actual game object
@@ -79,6 +82,7 @@ def choose_targets(source):
         targets_chosen.append(card)
     return targets_chosen
 
+
 def parse_targets(criterias):
     for i, v in enumerate(criterias):
         if v == 'creature':
@@ -115,6 +119,7 @@ def parse_targets(criterias):
 
     return criterias
 
+
 def parse_ability_costs(cost):
     _costs = cost.split(', ')
     costs = []
@@ -137,3 +142,23 @@ def parse_ability_costs(cost):
 
     costs = " and ".join(costs)
     return costs
+
+
+def path_from_home(path):
+    """
+    Return a path that is relative to the "home" folder for the MTG engine data
+
+    The location of the home folder is derived as follows:
+    - if the MTG_ENGINE_HOME environment variable is set, its value is used;
+    - otherwise, the home folder defaults to the current working directory
+
+    NB: The given path MUST be a relative path
+
+    :param path: The path to be made relative to the MTG engine's home
+    :return: The same path, made relative to the engine's home folder
+    """
+
+    assert not os.path.isabs(path), f'Absolute paths are not supported by this function'
+
+    engine_home = os.environ.get('MTG_ENGINE_HOME', '')  # If not set, home defaults to current working dir
+    return os.path.join(engine_home, path)

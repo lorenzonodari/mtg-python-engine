@@ -13,6 +13,7 @@ from MTG import gamesteps
 from MTG import combat
 from MTG import triggers
 from MTG.exceptions import *
+from MTG.utils import path_from_home
 
 
 class Game(object):
@@ -560,14 +561,16 @@ class Game(object):
                 break
 
 
-
 def start_game():
     cards.setup_cards()
-    decks = [cards.read_deck('data/decks/deck1.txt'),
-             cards.read_deck('data/decks/deck1.txt')]
+    decks = [
+        cards.read_deck(path_from_home('data/decks/deck1.txt')),
+        cards.read_deck(path_from_home('data/decks/deck1.txt'))
+    ]
     GAME = Game(decks)
     GAME_PREVIOUS_STATE = None
     GAME.run_game()
+
 
 if __name__ == '__main__':
     start_game()

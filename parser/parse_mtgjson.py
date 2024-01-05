@@ -3,6 +3,7 @@ import json
 import pickle
 
 from MTG import static_abilities
+from MTG.utils import path_from_home
 
 
 # SET = 'M15'
@@ -10,7 +11,7 @@ SET = 'AllSets'
 NAME = 'cube'
 
 # only_parse_list = None
-only_parse_list = set(open('parser/cube_card_list.txt').read().strip().split('\n'))
+only_parse_list = set(open(path_from_home('parser/cube_card_list.txt')).read().strip().split('\n'))
 
 
 def star_or_int(c):
@@ -21,20 +22,18 @@ def star_or_int(c):
 
 
 def run():
-    with open('parser/data/%s.json' % SET) as f:
+    with open(path_from_home('parser/data/%s.json' % SET)) as f:
         cards = json.load(f)
         card_list = []
         for _set in cards.values():
             card_list.extend(_set['cards'])
 
-
-    fout = open("data/%s_cards.py" % NAME, "w")
+    fout = open(path_from_home("data/%s_cards.py" % NAME), "w")
     fout.write("from MTG import card\n"
                "from MTG import gameobject\n"
                "from MTG import cardtype\n"
                "from MTG import static_abilities\n"
                "from MTG import mana\n\n")
-
 
     name_to_id = {}
 
@@ -105,8 +104,7 @@ def run():
 
         name_to_id[name] = ID
         
-
-    with open("data/%s_name_to_id_dict.pkl" % NAME, "wb") as f:
+    with open(path_from_home("data/%s_name_to_id_dict.pkl" % NAME), "wb") as f:
         pickle.dump(name_to_id, f)
 
     fout.close()

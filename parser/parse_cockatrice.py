@@ -6,19 +6,17 @@ import pickle
 
 from MTG import cardtype
 from MTG import static_abilities
-
-
-
+from MTG.utils import path_from_home
 
 
 def run():
     # switch to sm_cards and replace-all 'all_set', 'sm_set' to just parse a sample of cards
-    with open('parser/data/cards.xml') as f:
+    with open(path_from_home('parser/data/cards.xml')) as f:
         soup = BeautifulSoup(f, 'xml')
 
     card_list = soup.cockatrice_carddatabase.cards.find_all('card')
     cnt = 0
-    fout = open("data/all_set_cards.py", "w")
+    fout = open(path_from_home("data/all_set_cards.py"), "w")
     fout.write("from MTG import card\n"
         "from MTG import gameobject\n"
         "from MTG import cardtype\n"
@@ -96,10 +94,10 @@ def run():
 # """.format(id_to_name, name_to_id))
 
 
-    with open("data/all_set_id_to_name_dict.pkl", "wb") as f:
+    with open(path_from_home("data/all_set_id_to_name_dict.pkl"), "wb") as f:
         pickle.dump(id_to_name, f)
 
-    with open("data/all_set_name_to_id_dict.pkl", "wb") as f:
+    with open(path_from_home("data/all_set_name_to_id_dict.pkl"), "wb") as f:
         pickle.dump(name_to_id, f)
 
     fout.close()

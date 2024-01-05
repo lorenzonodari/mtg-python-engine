@@ -7,6 +7,7 @@ from MTG import game
 from MTG import cards
 from MTG import permanent
 from MTG.exceptions import *
+from MTG.utils import path_from_home
 
 # test cases will fail if this is run
 # inside setUpClass, b/c cards get set up multiple times
@@ -23,8 +24,10 @@ class TestGameBase(unittest.TestCase):
 
     def setUp(self):
         self.startTime = time.time()
-        decks = [cards.read_deck('data/decks/deck1.txt'),
-                 cards.read_deck('data/decks/deck1.txt')]
+        decks = [
+            cards.read_deck(path_from_home('data/decks/deck1.txt')),
+            cards.read_deck(path_from_home('data/decks/deck1.txt'))
+        ]
         self.GAME = game.Game(decks, test=True)
         self.GAME.setup_game()
         self.player = self.GAME.players_list[0]

@@ -10,6 +10,7 @@ from MTG import abilities
 from MTG import triggers
 from MTG import mana
 from MTG import utils
+from MTG.utils import path_from_home
 from MTG import permanent
 
 
@@ -20,7 +21,7 @@ id_to_name_dict = {}
 # compile all the dictionaries from different parsed sets
 for pre in SETPREFIX:
     try:
-        with open('data/%s_name_to_id_dict.pkl' % pre, 'rb') as f:
+        with open(path_from_home('data/%s_name_to_id_dict.pkl' % pre), 'rb') as f:
             name_to_id_dict.update(pickle.load(f))
     except:
         print("%s name_to_id_dict not found\n" % pre)
@@ -431,7 +432,7 @@ def parse_card_from_lines(lines, log=None):
     exec(str_to_exe)
 
 
-def setup_cards(FILES=['data/m15_cards.txt', 'data/cube_cards.txt']):
+def setup_cards(files='!default!'):
     """
     Read in cards information from data/cards.txt
 
@@ -439,9 +440,15 @@ def setup_cards(FILES=['data/m15_cards.txt', 'data/cube_cards.txt']):
 
     """
 
+    if files == '!default!':
+        files = [
+            path_from_home('data/m15_cards.txt'),
+            path_from_home('data/cube_cards.txt')
+        ]
+
     f_log = open('setup_cards.log', 'w')
 
-    for name in FILES:
+    for name in files:
         with open(name, 'r') as f:
             lines = []  # buffer
 
