@@ -564,8 +564,8 @@ class Game(object):
 def start_game():
     cards.setup_cards()
     decks = [
-        cards.read_deck(path_from_home('data/decks/deck1.txt')),
-        cards.read_deck(path_from_home('data/decks/deck1.txt'))
+        cards.read_deck(path_from_home('card_db/decks/mono_red.txt')),
+        cards.read_deck(path_from_home('card_db/decks/mono_green.txt'))
     ]
     GAME = Game(decks)
     GAME_PREVIOUS_STATE = None

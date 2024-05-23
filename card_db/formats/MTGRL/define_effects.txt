@@ -1,0 +1,40 @@
+##############################
+Forest
+
+	Abilities:
+		T: self.controller.mana.add(mana.Mana.GREEN, 1)
+
+
+
+##############################
+Mountain
+
+	Abilities:
+		T: self.controller.mana.add(mana.Mana.RED, 1)
+
+
+
+##############################
+Grizzly Bears
+
+
+##############################
+Mons's Goblin Riders
+
+
+##############################
+Lightning Bolt
+
+	Targets:
+		'creature or player'
+
+	targets[0].take_damage(self, 3)
+
+
+##############################
+Giant Growth
+
+	Targets:
+		'creature'
+
+	targets[0].add_effect('modifyPT', (3, 3), self, self.game.eot_time)

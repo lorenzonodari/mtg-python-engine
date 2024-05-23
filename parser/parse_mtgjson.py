@@ -1,17 +1,10 @@
 import sys
 import json
 import pickle
+import argparse
 
 from MTG import static_abilities
 from MTG.utils import path_from_home
-
-
-# SET = 'M15'
-SET = 'AllSets'
-NAME = 'cube'
-
-# only_parse_list = None
-only_parse_list = set(open(path_from_home('parser/cube_card_list.txt')).read().strip().split('\n'))
 
 
 def star_or_int(c):
@@ -21,14 +14,15 @@ def star_or_int(c):
         return int(c)
 
 
-def run():
-    with open(path_from_home('parser/data/%s.json' % SET)) as f:
+def run(format_id):
+
+    with open(path_from_home(f'parser/formats/{format_id}.json')) as f:
         cards = json.load(f)
         card_list = []
         for _set in cards.values():
             card_list.extend(_set['cards'])
 
-    fout = open(path_from_home("data/%s_cards.py" % NAME), "w")
+    fout = open(path_from_home(f"card_db/formats/{format_id}/cards.py"), "w")
     fout.write("from MTG import card\n"
                "from MTG import gameobject\n"
                "from MTG import cardtype\n"
@@ -38,8 +32,6 @@ def run():
     name_to_id = {}
 
     for card in card_list:
-        if only_parse_list and card["name"] not in only_parse_list:
-            continue
 
         if card["name"] in name_to_id:  # already parsed card (ignore reprints)
             continue
@@ -49,33 +41,47 @@ def run():
             subtype = []
             _abilities = []
 
-            if "multiverseid" in card:
-                ID = 'c' + str(card["multiverseid"])
-            else:
-                continue
-                # ID = 'c' + str(card["id"])
+            ID = f"c{card['id'].replace('-', '_')}"
+
             name = card["name"]
             characteristics = {'name': name}
-            characteristics['text'] = card["text"] if "text" in card else ''
+            characteristics['text'] = card["oracle_text"] if "oracle_text" in card else '<missing>'
             characteristics['color'] = card["colorIdentity"] if "colorIdentity" in card else ''
             characteristics['mana_cost'] = (card["manaCost"].replace('{', '').replace('}', '')
                                             if "manaCost" in card else '')
             # types
-            if "supertypes" in card:
-                supertype = ('['
-                             + ', '.join(['cardtype.SuperType.' + i.upper()
-                                          for i in card["supertypes"]])
-                             + ']')
+            # NB: In line below, '—' is NOT a regular dash, is Unicode char U+2014
+            parsed_types = card["type_line"].split('—')[0].strip().split(' ')
+
+            if '—' in card["type_line"]:
+                parsed_subtypes = card["type_line"].split('—')[1].strip()
+            else:
+                parsed_subtypes = ''
+
+            card_types = []
+            card_supertypes = []
+            for type_token in parsed_types:
+
+                if type_token in ['Basic']:
+                    card_supertypes.append(type_token)
+                elif type_token in ['Land', 'Creature', 'Instant']:
+                    card_types.append(type_token)
+                else:
+                    assert False, f'Unknown type token: "{type_token}"'
 
             types = '[' + ', '.join(['cardtype.CardType.' + i.upper()
-                                     for i in card["types"]]) + ']'
+                                     for i in card_types]) + ']'
+            supertype = ('['
+                         + ', '.join(['cardtype.SuperType.' + i.upper()
+                                      for i in card_supertypes])
+                         + ']')
 
-            if 'Creature' in card["types"]:
+            characteristics["subtype"] = parsed_subtypes
+
+
+            if 'Creature' in card["type_line"]:
                 characteristics['power'], characteristics['toughness'] = star_or_int(
                     card["power"]), star_or_int(card["toughness"])
-
-            if "subtypes" in card:
-                characteristics["subtype"] = card["subtypes"]
 
             # static abilities
 
@@ -104,7 +110,7 @@ def run():
 
         name_to_id[name] = ID
         
-    with open(path_from_home("data/%s_name_to_id_dict.pkl" % NAME), "wb") as f:
+    with open(path_from_home(f"card_db/formats/{format_id}/name_to_id_dict.pkl"), "wb") as f:
         pickle.dump(name_to_id, f)
 
     fout.close()
@@ -114,4 +120,4 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
+    run("MTGRL")

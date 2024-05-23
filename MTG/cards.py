@@ -4,8 +4,9 @@ import math
 import re
 from collections import namedtuple
 
-from MTG.parsedcards import *
-from MTG.exceptions import *
+from card_db.formats.MTGRL.cards import *
+
+from MTG.exceptions import DeckListFormatException, CardNotImplementedException
 from MTG import abilities
 from MTG import triggers
 from MTG import mana
@@ -14,17 +15,19 @@ from MTG.utils import path_from_home
 from MTG import permanent
 
 
-SETPREFIX = ['M15', 'sm_set', 'cube']
+SETPREFIX = ['MTGRL']
 name_to_id_dict = {}
 id_to_name_dict = {}
 
 # compile all the dictionaries from different parsed sets
-for pre in SETPREFIX:
+for constructed_format in SETPREFIX:
     try:
-        with open(path_from_home('data/%s_name_to_id_dict.pkl' % pre), 'rb') as f:
-            name_to_id_dict.update(pickle.load(f))
-    except:
-        print("%s name_to_id_dict not found\n" % pre)
+        with open(path_from_home(f'card_db/formats/{constructed_format}/name_to_id_dict.pkl'), 'rb') as f:
+            loaded_dict = pickle.load(f)
+            name_to_id_dict.update(loaded_dict)
+    except Exception as e:
+        print(e)
+        print(f"{constructed_format} name_to_id_dict file not found\n")
 
 
 id_to_name_dict = {value: key for key, value in name_to_id_dict.items()}
@@ -78,8 +81,8 @@ def read_deck(filename):
                     else:
                         pass
                         # print("card {} does not exist\n".format(line[i+1:]))
-            except:
-                raise DecklistFormatException
+            except Exception as e:
+                raise DeckListFormatException(e)
 
     return deck
 
@@ -432,33 +435,30 @@ def parse_card_from_lines(lines, log=None):
     exec(str_to_exe)
 
 
-def setup_cards(files='!default!'):
+def setup_cards(format='MTGRL'):
     """
-    Read in cards information from data/cards.txt
+    Set up the classes needed to play a game in the given format
 
-    Logs in setup_cards.log
+    Read cards information from card_db/formats/{format}/define_effects.txt
+    Logs to card_db/formats/{format}/cards_setup.log
+
+    :param format: Name of the constructed format that should be loaded
 
     """
 
-    if files == '!default!':
-        files = [
-            path_from_home('data/m15_cards.txt'),
-            path_from_home('data/cube_cards.txt')
-        ]
+    f_log = open(f'card_db/formats/{format}/cards_setup.log', 'w')
 
-    f_log = open('setup_cards.log', 'w')
+    effects_definition_file = path_from_home(f'card_db/formats/{format}/define_effects.txt')
+    with open(effects_definition_file, 'r') as f:
+        lines = []  # buffer
 
-    for name in files:
-        with open(name, 'r') as f:
-            lines = []  # buffer
+        for line in f:
+            line = line.rstrip()
+            if not line:
+                continue
 
-            for line in f:
-                line = line.rstrip()
-                if not line:
-                    continue
-
-                if line[:3] == '###':  # end of a card
-                    parse_card_from_lines(lines, f_log)
-                    lines = []
-                else:  # wait to parse cards until we've read in all information about a card
-                    lines.append(line)
+            if line[:3] == '###':  # end of a card
+                parse_card_from_lines(lines, f_log)
+                lines = []
+            else:  # wait to parse cards until we've read in all information about a card
+                lines.append(line)

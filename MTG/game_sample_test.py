@@ -22,8 +22,8 @@ with mock.patch('builtins.input', side_effect=[
         ''
         ]):
     decks = [
-        cards.read_deck(path_from_home('data/decks/deck1.txt')),
-        cards.read_deck(path_from_home('data/decks/deck1.txt'))
+        cards.read_deck(path_from_home('card_db/decks/deck1.txt')),
+        cards.read_deck(path_from_home('card_db/decks/deck1.txt'))
     ]
     GAME = Game(decks)
     GAME.setup_game()

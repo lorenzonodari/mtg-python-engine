@@ -25,8 +25,8 @@ class TestGameBase(unittest.TestCase):
     def setUp(self):
         self.startTime = time.time()
         decks = [
-            cards.read_deck(path_from_home('data/decks/deck1.txt')),
-            cards.read_deck(path_from_home('data/decks/deck1.txt'))
+            cards.read_deck(path_from_home('card_db/decks/mono_green.txt')),
+            cards.read_deck(path_from_home('card_db/decks/mono_red.txt'))
         ]
         self.GAME = game.Game(decks, test=True)
         self.GAME.setup_game()
