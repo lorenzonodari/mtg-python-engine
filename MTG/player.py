@@ -1,4 +1,5 @@
 import pdb
+import pickle
 import traceback
 import random
 from copy import deepcopy
@@ -76,6 +77,25 @@ class Player():
     def __hash__(self):
         return hash(self.__repr__())
 
+    def __getstate__(self):
+
+        state = self.__dict__.copy()
+        state['turn_events'] = dict(self.turn_events)
+        state['last_turn_events'] = dict(self.last_turn_events)
+        state['trigger_listeners'] = dict(self.trigger_listeners)
+
+        return state
+
+    def __setstate__(self, state):
+
+        # Restore instance attributes (i.e., filename and lineno).
+        self.__dict__.update(state)
+
+        self.turn_events = defaultdict(lambda: None).update(state['turn_events'])
+        self.last_turn_events = defaultdict(lambda: None).update(state['last_turn_events'])
+        self.trigger_listeners = defaultdict(lambda: []).update(state['trigger_listeners'])
+
+
     @property
     def is_active(self):
         return self == self.game.current_player
@@ -136,6 +156,16 @@ class Player():
                 if answer == 'print':
                     self.game.print_game_state()
 
+                elif answer.startswith('dump'):
+
+                    split_cmd = answer.split(' ')
+                    assert len(split_cmd) == 2, "Usage: dump path/to/dumpfile_name"
+
+                    dump_filename = f"{split_cmd[1]}.pkl"
+                    with open(dump_filename, 'wb') as pickle_file:
+                        pickle.dump(self.game, pickle_file)
+                    print(f'Dumped game state to "{dump_filename}"')
+
                 elif answer == 'hand':
                     print(self.hand)
 
@@ -155,10 +185,10 @@ class Player():
                     print(self.mana)
 
                 ## debug
-                elif answer == 'addmana':
+                elif answer == '!addmana':
                     self.mana.add_str('WWWWWUUUUUBBBBBRRRRRGGGGG11111')
 
-                elif answer == 'debug':
+                elif answer == '!debug':
                     pdb.set_trace()
                     pass
 
@@ -309,10 +339,10 @@ class Player():
                 print("Illegial action. Resetting...")
                 self = PLAYER_PREVIOUS_STATE
 
-            except:
-                traceback.print_exc()
-                print("Bad format.\n")
-                continue
+            # except:
+            #     traceback.print_exc()
+            #     print("Bad format.\n")
+            #     continue
 
         return _play
 

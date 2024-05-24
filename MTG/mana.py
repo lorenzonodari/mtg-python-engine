@@ -54,6 +54,22 @@ class ManaPool():
         self.pool = defaultdict(lambda: 0)
         self.controller = controller
 
+    def __getstate__(self):
+
+        state = self.__dict__.copy()
+
+        mana = {mana_type: amount for mana_type, amount in self.pool.items() if amount > 0}
+        state["pool"] = mana
+
+        return state
+
+    def __setstate__(self, state):
+
+        # Restore instance attributes (i.e., filename and lineno).
+        self.__dict__.update(state)
+
+        self.pool = defaultdict(lambda: 0).update(state["pool"])
+
     def add(self, mana, amount=1):
         if isinstance(mana, str):
             self.add_str(mana)

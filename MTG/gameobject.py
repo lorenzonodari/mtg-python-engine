@@ -70,10 +70,26 @@ class GameObject():
         self.zone = zone
         self.previousState = previousState
         self.effects = defaultdict(lambda: SortedListWithKey(
-                                           [], lambda x : x.timestamp))
+                                           [], lambda x: x.timestamp))
 
         self.timestamp = self.game.timestamp if self.game else None
 
+    def __getstate__(self):
+
+        state = self.__dict__.copy()
+
+        effects = {effect: instances for effect, instances in self.effects.items() if len(instances) > 0}
+        state["effects"] = effects
+
+        return state
+
+    def __setstate__(self, state):
+
+        # Restore instance attributes (i.e., filename and lineno).
+        self.__dict__.update(state)
+
+        self.effects = defaultdict(lambda: SortedListWithKey(
+            [], lambda x: x.timestamp)).update(state["effects"])
 
     def __repr__(self):
         return '%r in %r (ID: %r)' % (self.name,
