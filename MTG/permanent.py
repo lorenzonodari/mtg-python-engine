@@ -121,11 +121,35 @@ from MTG import abilities
 
 class Status():
     def __init__(self):
-        self.reset()
+        self.tapped = False
+        self.not_untap = 0  # 0: untap normally; 1: not untap next turn; math.inf: not untap
+        self.flipped = False
+        self.face_up = True
+        self.phased_in = True
+        self.summoning_sick = True
+        self.damage_taken = 0
+        self.is_attacking = []
+        self.is_blocking = []
+        self.counters = defaultdict(lambda: 0)
+
+    def __getstate__(self):
+
+        state = self.__dict__.copy()
+
+        counters = dict(state["counters"])
+        state["counters"] = counters
+
+        return state
+
+    def __setstate__(self, state):
+
+        # Restore instance attributes (i.e., filename and lineno).
+        self.__dict__.update(state)
+
+        self.counters = defaultdict(lambda: 0).update(state["counters"])
 
     def __repr__(self):
         return str(self.__dict__)
-
 
     def __str__(self):
         s = []
