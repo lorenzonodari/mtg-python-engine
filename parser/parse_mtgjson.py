@@ -45,6 +45,7 @@ def run(format_id):
 
             name = card["name"]
             characteristics = {'name': name}
+            characteristics['image_url'] = card['image_uris']["normal"]
             characteristics['text'] = card["oracle_text"] if "oracle_text" in card else '<missing>'
             characteristics['color'] = card["colorIdentity"] if "colorIdentity" in card else ''
             characteristics['mana_cost'] = (card["manaCost"].replace('{', '').replace('}', '')

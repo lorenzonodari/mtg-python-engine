@@ -21,7 +21,8 @@ class Characteristics():
                  abilities=[],
                  power=None,
                  toughness=None,
-                 loyalty=None):
+                 loyalty=None,
+                 image_url=None):
         self.name = name
         self.mana_cost = mana_cost
         self.color = color
@@ -33,6 +34,7 @@ class Characteristics():
         self.power = power
         self.toughness = toughness
         self.loyalty = loyalty
+        self.image_url = image_url
 
     def __repr__(self):
         return str(self.__dict__)
