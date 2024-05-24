@@ -528,13 +528,12 @@ class Game(object):
     # print each player's states
     # print debug variables
     def print_game_state(self):
-        print("\n\n\nPRINTING GAME STATE")
+        print("[Current Game State]\n")
 
-        print("\n\n\n")
-        print("stack:\n")
+        print("~~~ Stack:\n")
         print(self.stack)
+        print('\n')
 
-        print("\n\n\n")
         for _player in self.players_list:
             _player.print_player_state()
 

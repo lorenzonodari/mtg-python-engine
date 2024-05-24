@@ -740,26 +740,17 @@ class Player():
 
 
     def print_player_state(self):
-        print("\nPLAYER {}\nlife: {}\n".format(self.name, self.life))
 
-        print("mana: {}\n".format(self.mana))
+        print(f"~~~ Player {self.name} - Life: {self.life}")
 
-        print("\n\n\n")
-        print("battlefield: {}\n".format(len(self.battlefield)))
-        print(self.battlefield)
+        print(f"\t Library: {len(self.library)}")
+        # print(self.library)
 
-        print("\n\n\n")
-        print("hand: {}\n".format(len(self.hand)))
-        print(self.hand)
+        print(f'\t {self.hand}')
+        print(f'\t {self.battlefield}')
+        print(f'\t {self.graveyard}')
+        print(f'\t {self.exile}')
 
-        print("\n\n\n")
-        print("library: {}\n".format(len(self.library)))
-        print(self.library)
+        print(f"\t Mana pool: {self.mana}")
+        print('\n')
 
-        print("\n\n\n")
-        print("graveyard: {}\n".format(len(self.graveyard)))
-        print(self.graveyard)
-
-        print("\n\n\n")
-        print("exile: {}\n".format(len(self.exile)))
-        print(self.exile)
