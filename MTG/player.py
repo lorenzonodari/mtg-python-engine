@@ -164,16 +164,6 @@ class Player():
                 if answer == 'print':
                     self.game.print_game_state()
 
-                elif answer.startswith('dump'):
-
-                    split_cmd = answer.split(' ')
-                    assert len(split_cmd) == 2, "Usage: dump path/to/dumpfile_name"
-
-                    dump_filename = f"{split_cmd[1]}.pkl"
-                    with open(dump_filename, 'wb') as pickle_file:
-                        pickle.dump(self.game, pickle_file)
-                    print(f'Dumped game state to "{dump_filename}"')
-
                 elif answer == 'hand':
                     print(self.hand)
 
@@ -192,7 +182,34 @@ class Player():
                 elif answer == 'mana':
                     print(self.mana)
 
-                ## debug
+                # Various dev/debug commands
+                elif answer == '!end':
+                    raise GamescriptEnded
+
+                elif answer == '!replay start':
+                    self.game.recording_replay = True
+                    self.game.replay = []
+
+                elif answer.startswith('!replay store'):
+
+                    split_cmd = answer.rsplit(' ', maxsplit=1)
+                    assert len(split_cmd) == 2, "Usage: !replay store path/to/replay"
+
+                    dump_filename = f"{split_cmd[1]}.pkl"
+                    with open(dump_filename, 'wb') as pickle_file:
+                        pickle.dump(self.game.replay, pickle_file)
+                    print(f'Stored replay as "{dump_filename}"')
+
+                elif answer.startswith('!dump'):
+
+                    split_cmd = answer.split(' ')
+                    assert len(split_cmd) == 2, "Usage: !dump path/to/dumpfile_name"
+
+                    dump_filename = f"{split_cmd[1]}.pkl"
+                    with open(dump_filename, 'wb') as pickle_file:
+                        pickle.dump([self.game], pickle_file)
+                    print(f'Dumped game state to "{dump_filename}"')
+
                 elif answer == '!addmana':
                     self.mana.add_str('WWWWWUUUUUBBBBBRRRRRGGGGG11111')
 
@@ -341,11 +358,11 @@ class Player():
                     break
 
                 else:
-                    raise BadFormatException()
+                    raise BadFormatException(f"Invalid input: {answer}")
 
             except ResetGameException:
                 print("Illegial action. Resetting...")
-                self = PLAYER_PREVIOUS_STATE
+                self.__dict__ = PLAYER_PREVIOUS_STATE.__dict__.copy()
 
             # except:
             #     traceback.print_exc()

@@ -1,7 +1,7 @@
 from io import BytesIO
+from typing import List
 
 import pygame
-import queue
 import pickle
 
 from MTG.game import Game
@@ -56,22 +56,39 @@ def _load_card_image(image_url, resize=None):
     return image_screen
 
 
-def pygame_event_loop(screen: pygame.Surface, gamestates_queue: queue.Queue) -> None:
+def pygame_event_loop(screen: pygame.Surface, replay: List[Game]) -> None:
 
     clock = pygame.time.Clock()
-    gamestate = gamestates_queue.get()
 
     running = True
+    replay_step = 0
+    last_drawn_step = None
     while running:
 
         for event in pygame.event.get():
+
+            if event.type == pygame.KEYUP and event.key == pygame.K_LEFT:
+                replay_step -= 1
+                replay_step = max(replay_step, 0)
+
+            if event.type == pygame.KEYUP and event.key == pygame.K_RIGHT:
+                replay_step += 1
+                replay_step = min(replay_step, len(replay) - 1)
+                pass
+
             if event.type == pygame.QUIT:
                 running = False
 
-        screen.fill((0, 0, 0))
-        render_gamestate_frame(gamestate, screen)
+        if last_drawn_step != replay_step:
 
-        pygame.display.flip()
+            gamestate = replay[replay_step]
+            screen.fill((0, 0, 0))
+            render_gamestate_frame(gamestate, screen)
+            pygame.display.flip()
+
+            last_drawn_step = replay_step
+            pygame.display.set_caption(f'Step: {replay_step + 1}/{len(replay)}')
+
         clock.tick(60)
 
     pygame.quit()
@@ -221,26 +238,34 @@ def render_turn_info(game: Game, turn_screen: pygame.Surface) -> None:
     else:
         current_player = "Turn player: \\/"
 
-    if not game.passed_priority:
-        priority = "Priority: /\\"
+    # TODO: Fix
+    if game.passed_priority == 1:
+        if game.current_player is upper_player:
+            priority = "Priority: /\\"
+        else:
+            priority = "Priority: \\/"
     else:
-        priority = "Priority: \\/"
+        if game.current_player is upper_player:
+            priority = "Priority: \\/"
+        else:
+            priority = "Priority: /\\"
 
     turn_priority_str = " - ".join((turn_number, current_player, priority))
 
     turn_priority_info = pygame.font.SysFont('serif', 24).render(turn_priority_str, True, (0, 0, 0))
     turn_screen.blit(turn_priority_info, (0, info.get_height()))
 
+    turn_step_str = f"Turn step: {game.current_step}"
+    turn_step_info = pygame.font.SysFont('serif', 24).render(turn_step_str, True, (0, 0, 0))
+    turn_screen.blit(turn_step_info, (0, info.get_height() + turn_priority_info.get_height()))
+
 
 if __name__ == "__main__":
 
-    with open('test.pkl', 'rb') as pickled_game:
-        game = pickle.load(pickled_game)
-
-    queue = queue.Queue(maxsize=1)
-    queue.put_nowait(game)
+    with open('test_replay.pkl', 'rb') as pickled_game:
+        replay = pickle.load(pickled_game)
 
     pygame.init()
     screen = pygame.display.set_mode((1440, 810))
-    pygame_event_loop(screen, queue)
+    pygame_event_loop(screen, replay)
 

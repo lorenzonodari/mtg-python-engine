@@ -3,8 +3,7 @@ import os
 import traceback
 import time
 import pdb
-
-from copy import deepcopy
+import copy
 
 from MTG import player
 from MTG import zone
@@ -37,6 +36,22 @@ class Game(object):
         # self.players = cycle(self.players_list)
 
         # self.previous_state = GAME_PREVIOUS_STATE
+        self.recording_replay = False
+        self.replay = None
+
+    def __getstate__(self):
+
+        state = self.__dict__.copy()
+        state["recording_replay"] = False
+        state["replay"] = None
+
+        return state
+
+    def __setstate__(self, state):
+
+        self.__dict__.update(state)
+        self.recording_replay = False
+        self.replay = None
 
     @property
     def timestamp(self):
@@ -147,6 +162,7 @@ class Game(object):
 
 
     def handle_priority(self, step, priority=None):
+
         # priority tracks the index of the player that currently have priority
         if priority is None:
             priority = self.players_list.index(self.current_player)
@@ -224,6 +240,11 @@ class Game(object):
                     _play.apply()
                 else:
                     self.stack.add(_play)  # add to stack
+
+            if self.recording_replay:
+                previous_gamestate = copy.deepcopy(self)
+                previous_gamestate.current_step = step
+                self.replay.append(previous_gamestate)
 
     def handle_beginning_phase(self, step):
         if step is gamesteps.Step.UNTAP:
@@ -558,6 +579,8 @@ class Game(object):
                 self.handle_turn()
             except GameOverException:
                 break
+            except GamescriptEnded:
+                break
 
 
 def start_game():
@@ -566,9 +589,8 @@ def start_game():
         cards.read_deck(path_from_home('card_db/decks/mono_red.txt')),
         cards.read_deck(path_from_home('card_db/decks/mono_green.txt'))
     ]
-    GAME = Game(decks)
-    GAME_PREVIOUS_STATE = None
-    GAME.run_game()
+    game = Game(decks)
+    game.run_game()
 
 
 if __name__ == '__main__':
