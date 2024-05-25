@@ -80,7 +80,7 @@ class GameObject():
 
         state = self.__dict__.copy()
 
-        effects = {effect: instances for effect, instances in self.effects.items() if len(instances) > 0}
+        effects = None if self.effects is None else {effect: instances for effect, instances in self.effects.items() if len(instances) > 0}
         state["effects"] = effects
 
         return state
@@ -91,7 +91,10 @@ class GameObject():
         self.__dict__.update(state)
 
         self.effects = defaultdict(lambda: SortedListWithKey(
-            [], lambda x: x.timestamp)).update(state["effects"])
+            [], lambda x: x.timestamp))
+
+        if state["effects"] is not None:
+            self.effects.update(state["effects"])
 
     def __repr__(self):
         return '%r in %r (ID: %r)' % (self.name,

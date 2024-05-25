@@ -58,7 +58,7 @@ class ManaPool():
 
         state = self.__dict__.copy()
 
-        mana = {mana_type: amount for mana_type, amount in self.pool.items() if amount > 0}
+        mana = None if self.pool is None else {mana_type: amount for mana_type, amount in self.pool.items() if amount > 0}
         state["pool"] = mana
 
         return state
@@ -68,7 +68,9 @@ class ManaPool():
         # Restore instance attributes (i.e., filename and lineno).
         self.__dict__.update(state)
 
-        self.pool = defaultdict(lambda: 0).update(state["pool"])
+        self.pool = defaultdict(lambda: 0)
+        if state["pool"] is not None:
+            self.pool.update(state["pool"])
 
     def add(self, mana, amount=1):
         if isinstance(mana, str):

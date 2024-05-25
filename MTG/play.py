@@ -2,6 +2,11 @@ import inspect
 from MTG import gameobject
 from MTG import zone
 
+
+def _default_apply_condition():
+    return True
+
+
 class Play(gameobject.GameObject):
     """
     Represents an ability or spell on the stack.
@@ -11,7 +16,7 @@ class Play(gameobject.GameObject):
     """
 
     # TODO: unify this with gameObject init (particularly with targetting)
-    def __init__(self, apply_func, apply_condition=lambda: True, 
+    def __init__(self, apply_func, apply_condition=_default_apply_condition,
                  card=None, source=None, name=None,
                  targets_chosen=None, target_criterias=None, is_mana_ability=False):
         
@@ -50,7 +55,6 @@ class Play(gameobject.GameObject):
 
         if self.targets_chosen:
             self.target_timestamps = [t.timestamp for t in self.targets_chosen]
-
 
     def __repr__(self):
         return "%s (ID: %r)" % (self.name, id(self))

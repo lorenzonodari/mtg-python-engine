@@ -136,7 +136,7 @@ class Status():
 
         state = self.__dict__.copy()
 
-        counters = dict(state["counters"])
+        counters = None if state["counters"] is None else dict(state["counters"])
         state["counters"] = counters
 
         return state
@@ -146,7 +146,9 @@ class Status():
         # Restore instance attributes (i.e., filename and lineno).
         self.__dict__.update(state)
 
-        self.counters = defaultdict(lambda: 0).update(state["counters"])
+        self.counters = defaultdict(lambda: 0)
+        if state["counters"] is not None:
+            self.counters.update(state["counters"])
 
     def __repr__(self):
         return str(self.__dict__)

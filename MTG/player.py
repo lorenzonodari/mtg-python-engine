@@ -80,9 +80,9 @@ class Player():
     def __getstate__(self):
 
         state = self.__dict__.copy()
-        state['turn_events'] = dict(self.turn_events)
-        state['last_turn_events'] = dict(self.last_turn_events)
-        state['trigger_listeners'] = dict(self.trigger_listeners)
+        state['turn_events'] = None if self.turn_events is None else dict(self.turn_events)
+        state['last_turn_events'] = None if self.last_turn_events is None else dict(self.last_turn_events)
+        state['trigger_listeners'] = None if self.trigger_listeners is None else dict(self.trigger_listeners)
 
         return state
 
@@ -91,9 +91,17 @@ class Player():
         # Restore instance attributes (i.e., filename and lineno).
         self.__dict__.update(state)
 
-        self.turn_events = defaultdict(lambda: None).update(state['turn_events'])
-        self.last_turn_events = defaultdict(lambda: None).update(state['last_turn_events'])
-        self.trigger_listeners = defaultdict(lambda: []).update(state['trigger_listeners'])
+        self.turn_events = defaultdict(lambda: None)
+        if state['turn_events'] is not None:
+            self.turn_events.update(state["turn_events"])
+
+        self.last_turn_events = defaultdict(lambda: None)
+        if state['last_turn_events'] is not None:
+            self.last_turn_events.update(state["last_turn_events"])
+
+        self.trigger_listeners = defaultdict(lambda: [])
+        if state['trigger_listeners'] is not None:
+            self.trigger_listeners.update(state["trigger_listeners"])
 
 
     @property
